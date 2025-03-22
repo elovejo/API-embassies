@@ -9,7 +9,9 @@ export default async (req, res) => {
       return res.status(400).json({ error: "Falta el ID de la embajada" });
     }
 
-    const response = await fetch(`https://zuztqqbnvridpzfdxldv.supabase.co/rest/v1/embassies?id=eq.${id}`, {
+    const encodedId = encodeURIComponent(id); // Escapar caracteres especiales
+
+    const response = await fetch(`https://zuztqqbnvridpzfdxldv.supabase.co/rest/v1/embassies?id=eq.${encodedId}`, {
       headers: {
         "apikey": process.env.SUPABASE_API_KEY,
         "Authorization": `Bearer ${process.env.SUPABASE_API_KEY}`,
