@@ -1,19 +1,49 @@
+// Archivo: middleware.js (en la raíz del proyecto)
 import { NextResponse } from 'next/server';
 
 export function middleware(request) {
-  // Ejemplo: Reescritura de URL según una condición
-  if (request.nextUrl.pathname.startsWith('/api/embassies')) {
-    const id = request.nextUrl.searchParams.get('id');
-    if (!id) {
-      return NextResponse.redirect(new URL('/error-page', request.url));
+  // Verificar autenticación (ejemplo)
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader && request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.json(
+      { error: 'Se requiere autenticación' },
+      { status: 401 }
+    );
+  }
+  
+  // Validación específica para la ruta de embajadas
+  if (request.nextUrl.pathname.startsWith('/api/embassies/search')) {
+    const searchTerm = request.nextUrl.searchParams.get('term');
+    if (!searchTerm) {
+      return NextResponse.json(
+        { error: 'Se requiere un término de búsqueda' },
+        { status: 400 }
+      );
     }
   }
 
-  // Retornar la respuesta por defecto si no hay cambios
+  // Para la ruta específica que busca por ID
+  if (request.nextUrl.pathname.match(/^\/api\/embassies\/\d+$/)) {
+    // Aquí podrías validar el formato del ID si es necesario
+    const id = request.nextUrl.pathname.split('/').pop();
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+  }
+
+  // Logs para monitoreo (opcional)
+  console.log(`Solicitud a ${request.nextUrl.pathname}`);
+
+  // Permitir que la solicitud continúe
   return NextResponse.next();
 }
 
-// Aplicar middleware a rutas específicas
+// Configurar a qué rutas aplicar este middleware
 export const config = {
-  matcher: '/api/:path*', // Define a qué rutas aplicar este middleware
+  matcher: [
+    '/api/:path*',  // Aplicar a todas las rutas API
+  ],
 };
