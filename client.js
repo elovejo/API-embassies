@@ -1,99 +1,88 @@
-import { inject } from '@vercel/analytics';
-inject();
-// Este archivo reemplazaría tu código original del front-end
+import express from 'express';
+import fetch from 'node-fetch';
+import dotenv from 'dotenv';
 
-// Función para obtener todas las embajadas desde nuestra API
-async function fetchEmbassies() {
-    try {
-        const response = await fetch("http://localhost:3000/api/embassies");
+dotenv.config(); // Carga las variables de entorno desde .env
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
+const app = express();
+const port = 3000;
+
+const SUPABASE_URL = "https://zuztqqbnvridpzfdxldv.supabase.co/rest/v1/embassies";
+const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY;
+
+// Función para obtener datos de Supabase
+async function fetchSupabase(url, queryParams = {}) {
+    const query = new URLSearchParams(queryParams);
+    const fullUrl = query ? `${url}?${query}` : url;
+
+    const response = await fetch(fullUrl, {
+        headers: {
+            "apikey": SUPABASE_API_KEY,
+            "Authorization": `Bearer ${SUPABASE_API_KEY}`,
+            "Content-Type": "application/json"
         }
+    });
 
-        const data = await response.json();
-        renderEmbassies(data);
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw { status: response.status, message: errorText };
+    }
+
+    return await response.json();
+}
+
+// Obtener todas las embajadas
+app.get('/api/embassies', async (req, res) => {
+    try {
+        const data = await fetchSupabase(SUPABASE_URL);
+        res.json(data);
     } catch (error) {
         console.error("Error al obtener embajadas:", error);
+        res.status(error.status || 500).json({ error: error.message || "Error interno del servidor" });
     }
-}
-
-// Función para buscar embajadas por término
-async function searchEmbassies(searchTerm) {
-    try {
-        const response = await fetch(`http://localhost:3000/api/embassies/search?term=${encodeURIComponent(searchTerm)}`);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
-        }
-
-        const data = await response.json();
-        renderEmbassies(data);
-    } catch (error) {
-        console.error("Error al buscar embajadas:", error);
-    }
-}
-
-// Función para obtener una embajada específica por ID
-async function fetchEmbassyById(embassyId) {
-    try {
-        const response = await fetch(`/api/embassies/${embassyId}`);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
-        }
-
-        const embassy = await response.json();
-        // Aquí puedes manejar la embajada individual, por ejemplo:
-        renderSingleEmbassy(embassy);
-    } catch (error) {
-        console.error("Error al obtener embajada por ID:", error);
-    }
-}
-
-// Función para mostrar los datos en la página
-function renderEmbassies(embassies) {
-    const container = document.getElementById("embassiesContainer");
-    if (!container) {
-        console.error("No se encontró el contenedor en el HTML");
-        return;
-    }
-
-    container.innerHTML = ""; // Limpiar contenido previo
-    embassies.forEach(embassy => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-            <h3>${embassy.country}</h3>
-            <p><strong>Tipo:</strong> ${embassy.type}</p>
-            <p><strong>Dirección:</strong> ${embassy.address}</p>
-            <p><strong>Teléfono:</strong> ${embassy.phone}</p>
-            <p><strong>Email:</strong> <a href="mailto:${embassy.email}">${embassy.email}</a></p>
-            <p><strong>Website:</strong> <a href="${embassy.website}" target="_blank">${embassy.website}</a></p>
-            <hr>
-        `;
-        container.appendChild(div);
-    });
-}
-
-// Filtro en tiempo real con búsqueda en el servidor
-document.getElementById("search").addEventListener("input", (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    
-    // Si el término de búsqueda está vacío, mostrar todas las embajadas
-    if (searchTerm === "") {
-        fetchEmbassies();
-        return;
-    }
-    
-    // Debounce para evitar muchas llamadas al servidor
-    clearTimeout(window.searchTimeout);
-    window.searchTimeout = setTimeout(() => {
-        searchEmbassies(searchTerm);
-    }, 300);
 });
 
-// Cargar datos al iniciar
-fetchEmbassies();
+// Buscar embajadas por término
+app.get('/api/embassies/search', async (req, res) => {
+    try {
+        const searchTerm = req.query.term?.toLowerCase();
+
+        if (!searchTerm) {
+            return res.status(400).json({ error: "Se requiere un término de búsqueda" });
+        }
+
+        const allEmbassies = await fetchSupabase(SUPABASE_URL);
+
+        const filteredEmbassies = allEmbassies.filter(embassy =>
+            embassy.country.toLowerCase().includes(searchTerm) ||
+            embassy.address.toLowerCase().includes(searchTerm) ||
+            embassy.email.toLowerCase().includes(searchTerm)
+        );
+
+        res.json(filteredEmbassies);
+    } catch (error) {
+        console.error("Error al buscar embajadas:", error);
+        res.status(error.status || 500).json({ error: error.message || "Error interno del servidor" });
+    }
+});
+
+// Obtener una embajada por ID
+app.get('/api/embassies/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const data = await fetchSupabase(SUPABASE_URL, { id: `eq.${id}` });
+
+        if (data.length === 0) {
+            return res.status(404).json({ error: "Embajada no encontrada" });
+        }
+
+        res.json(data[0]);
+    } catch (error) {
+        console.error("Error al obtener embajada:", error);
+        res.status(error.status || 500).json({ error: error.message || "Error interno del servidor" });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Servidor escuchando en http://localhost:${port}`);
+});

@@ -3,9 +3,10 @@
     "version": "1.0.0",
     "description": "API de embajadas con Node.js y Express",
     "main": "index.js",
+    "type": "module",
     "scripts": {
         "start": "node index.js",
-        "dev": "nodemon index.js"
+        "dev": "nodemon client.js"
     },
     "dependencies": {
         "@vercel/analytics": "^1.5.0",
