@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   try {
     const response = await fetch("https://zuztqqbnvridpzfdxldv.supabase.co/rest/v1/embassies", {
       headers: {
