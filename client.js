@@ -36,6 +36,24 @@ async function searchEmbassies(searchTerm) {
     }
 }
 
+// Función para obtener una embajada específica por ID
+async function fetchEmbassyById(embassyId) {
+    try {
+        const response = await fetch(`/api/embassies/${embassyId}`);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
+        }
+
+        const embassy = await response.json();
+        // Aquí puedes manejar la embajada individual, por ejemplo:
+        renderSingleEmbassy(embassy);
+    } catch (error) {
+        console.error("Error al obtener embajada por ID:", error);
+    }
+}
+
 // Función para mostrar los datos en la página
 function renderEmbassies(embassies) {
     const container = document.getElementById("embassiesContainer");
