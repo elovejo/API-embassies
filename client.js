@@ -1,3 +1,5 @@
+import { inject } from '@vercel/analytics';
+inject();
 // Este archivo reemplazaría tu código original del front-end
 
 // Función para obtener todas las embajadas desde nuestra API
