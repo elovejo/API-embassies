@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 module.exports = async (req, res) => {
   try {
-    const { id } = req.query; // En Vercel, `[id].js` usa req.query.id
+    const id = req.query.id;
     
     if (!id) {
       return res.status(400).json({ error: "Falta el ID de la embajada" });
