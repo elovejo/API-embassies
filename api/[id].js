@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 
 export default async (req, res) => {
+  console.log("req.query:", req.query);
   try {
     const id = req.query.id;
     
