@@ -1,49 +1,36 @@
-// Archivo: middleware.js (en la raíz del proyecto)
-import { NextResponse } from 'next/server';
-
-export function middleware(request) {
-  // Verificar autenticación (ejemplo)
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader && request.nextUrl.pathname.startsWith('/api/')) {
-    return NextResponse.json(
-      { error: 'Se requiere autenticación' },
-      { status: 401 }
-    );
+// api/middleware.js
+module.exports = (req, res, next) => {
+  // Configurar CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Para solicitudes OPTIONS (pre-flight)
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
   
-  // Validación específica para la ruta de embajadas
-  if (request.nextUrl.pathname.startsWith('/api/embassies/search')) {
-    const searchTerm = request.nextUrl.searchParams.get('term');
+  // Verificación de autenticación (opcional)
+  const authHeader = req.headers.authorization;
+  if (!authHeader && req.url.startsWith('/api/')) {
+    return res.status(401).json({ error: 'Se requiere autenticación' });
+  }
+  
+  // Validaciones específicas
+  if (req.url.startsWith('/api/embassies/search')) {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const searchTerm = url.searchParams.get('term');
     if (!searchTerm) {
-      return NextResponse.json(
-        { error: 'Se requiere un término de búsqueda' },
-        { status: 400 }
-      );
+      return res.status(400).json({ error: 'Se requiere un término de búsqueda' });
     }
   }
-
-  // Para la ruta específica que busca por ID
-  if (request.nextUrl.pathname.match(/^\/api\/embassies\/\d+$/)) {
-    // Aquí podrías validar el formato del ID si es necesario
-    const id = request.nextUrl.pathname.split('/').pop();
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: 'ID inválido' },
-        { status: 400 }
-      );
-    }
+  
+  // Log para monitoreo
+  console.log(`${req.method} ${req.url}`);
+  
+  // Continuar con el siguiente middleware o función
+  if (typeof next === 'function') {
+    return next();
   }
 
-  // Logs para monitoreo (opcional)
-  console.log(`Solicitud a ${request.nextUrl.pathname}`);
-
-  // Permitir que la solicitud continúe
-  return NextResponse.next();
-}
-
-// Configurar a qué rutas aplicar este middleware
-export const config = {
-  matcher: [
-    '/api/:path*',  // Aplicar a todas las rutas API
-  ],
 };
