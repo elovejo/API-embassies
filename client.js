@@ -7,15 +7,15 @@ dotenv.config(); // Carga las variables de entorno desde .env
 const app = express();
 const port = 3000;
 
-const SUPABASE_URL = "https://zuztqqbnvridpzfdxldv.supabase.co/rest/v1/embassies";
+const BASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY;
 
 // Función para obtener datos de Supabase
-async function fetchSupabase(url, queryParams = {}) {
+async function fetchSupabase(endpoint, queryParams = {}) {
     const query = new URLSearchParams(queryParams);
-    const fullUrl = query ? `${url}?${query}` : url;
+    const url = `${BASE_URL}/rest/v1/${endpoint}?${query}`;
 
-    const response = await fetch(fullUrl, {
+    const response = await fetch(url, {
         headers: {
             "apikey": SUPABASE_API_KEY,
             "Authorization": `Bearer ${SUPABASE_API_KEY}`,
@@ -31,55 +31,73 @@ async function fetchSupabase(url, queryParams = {}) {
     return await response.json();
 }
 
-// Obtener todas las embajadas
-app.get('/api/embassies', async (req, res) => {
+app.get("/api/embassies", async (req, res) => {
     try {
-        const data = await fetchSupabase(SUPABASE_URL);
-        res.json(data);
+        const cityFilter = req.query.city?.toLowerCase();
+        const countryFilter = req.query.country?.toLowerCase();
+        const typeFilter = req.query.type?.toLowerCase();
+
+        const [cities, embassies, countries, types, contacts, contactTypes] =
+            await Promise.all([
+                fetchSupabase("cities"),
+                fetchSupabase("embassies"),
+                fetchSupabase("countries"),
+                fetchSupabase("embassy_types"),
+                fetchSupabase("contacts"),
+                fetchSupabase("contact_types"),
+            ]);
+
+        const getCountry = (id) => countries.find((c) => c.id === id);
+        const getType = (id) => types.find((t) => t.id === id);
+        const getContacts = (embassyId) => {
+            const cons = contacts.filter((c) => c.embassy_id === embassyId);
+            return cons.map((c) => ({
+                type: contactTypes.find((ct) => ct.id === c.type_id)?.name || "unknown",
+                value: c.value,
+            }));
+        };
+
+        const result = cities
+            .filter(city => !cityFilter || city.name.toLowerCase().includes(cityFilter))
+            .map(city => {
+                const cityEmbassies = embassies
+                    .filter(e => e.city_id === city.id)
+                    .filter(e => {
+                        const country = getCountry(e.country_id);
+                        const type = getType(e.type_id);
+                        return (
+                            (!countryFilter || country?.name.toLowerCase().includes(countryFilter)) &&
+                            (!typeFilter || type?.name.toLowerCase() === typeFilter)
+                        );
+                    })
+                    .map(e => ({
+                        id: e.id,
+                        country: {
+                            name: getCountry(e.country_id)?.name || "Unknown",
+                            alfa2: getCountry(e.country_id)?.alfa2 || "",
+                        },
+                        type: getType(e.type_id)?.name || "Unknown",
+                        contacts: [
+                            { type: "address", value: e.address },
+                            { type: "lat", value: String(e.lat) },
+                            { type: "lng", value: String(e.lng) },
+                            ...getContacts(e.id),
+                        ],
+                    }));
+
+                return {
+                    city: city.name,
+                    embassies: cityEmbassies,
+                };
+            })
+            .filter(entry => entry.embassies.length > 0);
+
+        res.json(result);
     } catch (error) {
-        console.error("Error al obtener embajadas:", error);
-        res.status(error.status || 500).json({ error: error.message || "Error interno del servidor" });
-    }
-});
-
-// Buscar embajadas por término
-app.get('/api/embassies/search', async (req, res) => {
-    try {
-        const searchTerm = req.query.term?.toLowerCase();
-
-        if (!searchTerm) {
-            return res.status(400).json({ error: "Se requiere un término de búsqueda" });
-        }
-
-        const allEmbassies = await fetchSupabase(SUPABASE_URL);
-
-        const filteredEmbassies = allEmbassies.filter(embassy =>
-            embassy.country.toLowerCase().includes(searchTerm) ||
-            embassy.address.toLowerCase().includes(searchTerm) ||
-            embassy.email.toLowerCase().includes(searchTerm)
-        );
-
-        res.json(filteredEmbassies);
-    } catch (error) {
-        console.error("Error al buscar embajadas:", error);
-        res.status(error.status || 500).json({ error: error.message || "Error interno del servidor" });
-    }
-});
-
-// Obtener una embajada por ID
-app.get('/api/embassies/:id', async (req, res) => {
-    try {
-        const id = req.params.id;
-        const data = await fetchSupabase(SUPABASE_URL, { id: `eq.${id}` });
-
-        if (data.length === 0) {
-            return res.status(404).json({ error: "Embajada no encontrada" });
-        }
-
-        res.json(data[0]);
-    } catch (error) {
-        console.error("Error al obtener embajada:", error);
-        res.status(error.status || 500).json({ error: error.message || "Error interno del servidor" });
+        console.error("Error:", error.message);
+        res.status(500).json({
+            error: "Error al construir JSON anidado con filtros",
+        });
     }
 });
 
