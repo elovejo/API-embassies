@@ -1,36 +1,91 @@
 import fetch from 'node-fetch';
 
+const BASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY;
+
+async function fetchSupabase(endpoint, queryParams = {}) {
+  const query = new URLSearchParams(queryParams);
+  const url = `${BASE_URL}/rest/v1/${endpoint}?${query}`;
+
+  const response = await fetch(url, {
+    headers: {
+      apikey: SUPABASE_API_KEY,
+      Authorization: `Bearer ${SUPABASE_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw { status: response.status, message: errorText };
+  }
+
+  return await response.json();
+}
+
 export default async (req, res) => {
   try {
-    const searchTerm = req.query.term?.toLowerCase();
-    
-    if (!searchTerm) {
-      return res.status(400).json({ error: "Se requiere un término de búsqueda" });
-    }
+    const cityFilter = req.query.city?.toLowerCase();
+    const countryFilter = req.query.country?.toLowerCase();
+    const typeFilter = req.query.type?.toLowerCase();
 
-    const response = await fetch("https://zuztqqbnvridpzfdxldv.supabase.co/rest/v1/embassies", {
-      headers: {
-        "apikey": process.env.SUPABASE_API_KEY,
-        "Authorization": `Bearer ${process.env.SUPABASE_API_KEY}`,
-        "Content-Type": "application/json"
-      }
-    });
+    const [cities, embassies, countries, types, contacts, contactTypes] = await Promise.all([
+      fetchSupabase('cities'),
+      fetchSupabase('embassies'),
+      fetchSupabase('countries'),
+      fetchSupabase('embassy_types'),
+      fetchSupabase('contacts'),
+      fetchSupabase('contact_types'),
+    ]);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return res.status(response.status).json({ error: errorText });
-    }
+    const getCountry = (id) => countries.find((c) => c.id === id);
+    const getType = (id) => types.find((t) => t.id === id);
+    const getContacts = (embassyId) =>
+      contacts
+        .filter((c) => c.embassy_id === embassyId)
+        .map((c) => ({
+          type: contactTypes.find((ct) => ct.id === c.type_id)?.name || 'unknown',
+          value: c.value,
+        }));
 
-    const allEmbassies = await response.json();
-    const filteredEmbassies = allEmbassies.filter(embassy => 
-      embassy.country.toLowerCase().includes(searchTerm) ||
-      embassy.address.toLowerCase().includes(searchTerm) ||
-      embassy.email.toLowerCase().includes(searchTerm)
-    );
-    
-    res.json(filteredEmbassies);
+    const result = cities
+      .filter((city) => !cityFilter || city.name.toLowerCase().includes(cityFilter))
+      .map((city) => {
+        const cityEmbassies = embassies
+          .filter((e) => e.city_id === city.id)
+          .filter((e) => {
+            const country = getCountry(e.country_id);
+            const type = getType(e.type_id);
+            return (
+              (!countryFilter || country?.name.toLowerCase().includes(countryFilter)) &&
+              (!typeFilter || type?.name.toLowerCase() === typeFilter)
+            );
+          })
+          .map((e) => ({
+            id: e.id,
+            country: {
+              name: getCountry(e.country_id)?.name || 'Unknown',
+              alfa2: getCountry(e.country_id)?.alfa2 || '',
+            },
+            type: getType(e.type_id)?.name || 'Unknown',
+            contacts: [
+              { type: 'address', value: e.address },
+              { type: 'lat', value: String(e.lat) },
+              { type: 'lng', value: String(e.lng) },
+              ...getContacts(e.id),
+            ],
+          }));
+
+        return {
+          city: city.name,
+          embassies: cityEmbassies,
+        };
+      })
+      .filter((entry) => entry.embassies.length > 0);
+
+    res.status(200).json(result);
   } catch (error) {
-    console.error("Error al buscar embajadas:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    console.error('Error en búsqueda:', error.message || error);
+    res.status(500).json({ error: 'Error al buscar embajadas' });
   }
 };
