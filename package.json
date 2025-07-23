@@ -1,21 +1,13 @@
 {
     "name": "embassy-api",
     "version": "1.0.0",
-    "description": "API de embajadas con Node.js y Express",
-    "main": "index.js",
+    "description": "API de embajadas con Node.js y Vercel Serverless Functions",
     "type": "module",
     "scripts": {
-        "start": "node index.js",
-        "dev": "nodemon client.js"
+        "dev": "vercel dev"
     },
     "dependencies": {
-        "@vercel/analytics": "^1.5.0",
-        "cors": "^2.8.5",
-        "dotenv": "^16.3.1",
-        "express": "^4.18.2",
         "node-fetch": "^2.7.0"
     },
-    "devDependencies": {
-        "nodemon": "^3.0.2"
-    }
+    "devDependencies": {}
 }

@@ -8,11 +8,11 @@
     ],
     "routes": [
       {
-        "src": "/api/embassies",
+        "src": "/embassies",
         "dest": "/api/embassies.js"
       },
       {
-        "src": "/api/embassies/search",
+        "src": "/embassies/search",
         "dest": "/api/search.js"
       }
     ]

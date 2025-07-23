@@ -28,6 +28,7 @@ export default async (req, res) => {
     const cityFilter = req.query.city?.toLowerCase();
     const countryFilter = req.query.country?.toLowerCase();
     const typeFilter = req.query.type?.toLowerCase();
+    const term = req.query.term?.toLowerCase();
 
     const [cities, embassies, countries, types, contacts, contactTypes] = await Promise.all([
       fetchSupabase('cities'),
@@ -56,9 +57,23 @@ export default async (req, res) => {
           .filter((e) => {
             const country = getCountry(e.country_id);
             const type = getType(e.type_id);
+            // Filtro por term: país, dirección, email de contactos
+            let matchesTerm = true;
+            if (term) {
+              const countryName = country?.name?.toLowerCase() || '';
+              const address = e.address?.toLowerCase() || '';
+              const embassyContacts = getContacts(e.id);
+              const emailContact = embassyContacts.find((c) => c.type === 'email');
+              const email = emailContact?.value?.toLowerCase() || '';
+              matchesTerm =
+                countryName.includes(term) ||
+                address.includes(term) ||
+                email.includes(term);
+            }
             return (
               (!countryFilter || country?.name.toLowerCase().includes(countryFilter)) &&
-              (!typeFilter || type?.name.toLowerCase() === typeFilter)
+              (!typeFilter || type?.name.toLowerCase() === typeFilter) &&
+              matchesTerm
             );
           })
           .map((e) => ({
