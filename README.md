@@ -118,5 +118,3 @@ El archivo `vercel.json` configura las rutas de la API y el sitio estático:
   ]
 }
 ```
-
-Así, el contenido estático se sirve correctamente y la API sigue funcionando como antes.
