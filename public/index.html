@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentación | elovejo.com</title>
+    <link rel="shortcut icon" href="./img/favicon-32x32.png" type="image/x-icon">
+    <link rel="stylesheet" href="./css/style.css">
+
+    <!-- Metadatos SEO y sociales -->
+    <meta name="description" content="Documentación oficial de la API de embajadas en Bogotá, Colombia.">
+    <meta property="og:title" content="API de Embajadas - elovejo.com">
+    <meta property="og:description" content="Accede a datos de embajadas por país, ciudad o tipo.">
+    <meta property="og:image" content="https://elovejo.com/img/logo.png">
+    <meta property="og:url" content="https://elovejo.com">
+    <meta name="theme-color" content="#ffffff">
+</head>
+
+<body>
+    <nav>
+        <a href="https://elovejo.com" target="_blank" rel="noopener noreferrer">
+            <img src="./img/logo.png" alt="Logo elovejo.com" height="60" />
+        </a>
+    </nav>
+
+    <main class="container">
+        <header>
+            <h1>API de Embajadas</h1>
+            <p>Accede a datos de embajadas en Bogotá, Colombia.</p>
+        </header>
+
+        <section>
+            <h2>⚙️ Endpoints</h2>
+
+            <article>
+                <p><code class="inline">GET</code></p>
+                <pre><button class="copy-btn" aria-label="Copiar endpoint" title="Copiar"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-copy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg></button><code> /embassies</code></pre>
+                <p>Obtiene todas las embajadas.</p>
+            </article>
+
+            <article>
+                <p><code class="inline">GET</code></p>
+                <pre><button class="copy-btn" aria-label="Copiar endpoint" title="Copiar"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-copy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg></button><code> /embassies/search?term=germany</code></pre>
+                <p>Busca embajadas por país, dirección o email usando el parámetro term. También puedes filtrar por
+                    city, country o type.</p>
+            </article>
+
+            <article>
+                <p><code class="inline">GET</code></p>
+                <pre><button class="copy-btn" aria-label="Copiar endpoint" title="Copiar"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-copy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg></button><code> /embassies/search?city=bogota&country=germany&type=embajada</code></pre>
+                <p>Filtra embajadas por ciudad, país o tipo.</p>
+            </article>
+        </section>
+
+        <section>
+            <h2>📌 Ejemplos de uso y respuesta</h2>
+
+            <article>
+                <p>Buscar embajadas por país, dirección o email (GET)</p>
+                <pre><button class="copy-btn" aria-label="Copiar URL de ejemplo" title="Copiar"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-copy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg></button><code>https://api-embassies.vercel.app/embassies/search?term=germany</code></pre>
+
+                <p>Respuesta:</p>
+                <pre><button class="copy-btn" aria-label="Copiar JSON de ejemplo" title="Copiar"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-copy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg></button><code>[
+    {
+        "city": "Bogotá",
+        "embassies": [
+            {
+                "id": "4453986a-3271-4984-b9d4-8b1fe73985db",
+                "country": {
+                    "name": "Germany",
+                    "alfa2": "DE"
+                },
+                "type": "Embassy",
+                "contacts": [
+                    {
+                        "type": "address",
+                        "value": "Cra 11B #97-80, Bogotá"
+                    },
+                    {
+                        "type": "lat",
+                        "value": "4.6763"
+                    },
+                    {
+                        "type": "lng",
+                        "value": "-74.0488"
+                    },
+                    {
+                        "type": "phone",
+                        "value": "+57 1 1234567"
+                    },
+                    {
+                        "type": "email",
+                        "value": "info@germany-embajada.gov"
+                    }
+                ]
+            }
+        ]
+    }
+]</code>
+        </pre>
+            </article>
+        </section>
+
+        <section>
+            <h2 class="flex">
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-brand-github"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" /></svg>
+                &nbsp;Repositorio
+            </h2>
+            <p><a href="https://github.com/elovejo/API-embassies" target="_blank">github.com/elovejo/API-embassies</a>
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        Hecho con ❤️ por el Ovejo
+    </footer>
+
+    <!-- JS -->
+    <script>
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        copyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const codeBlock = button.nextElementSibling;
+                if (!codeBlock) return;
+                const textToCopy = codeBlock.innerText.trim();
+
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalIcon = button.innerHTML;
+                    button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" class="icon-tabler-check">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M5 12l5 5l10 -10" />
+            </svg>`;
+                    setTimeout(() => {
+                        button.innerHTML = originalIcon;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

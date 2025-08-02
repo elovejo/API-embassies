@@ -9,13 +9,41 @@ Hecho con ❤️ por elovejo.com
 La API permite:
 
 * Obtener una lista de todas las embajadas.
-* Buscar embajadas por término de búsqueda (país, dirección, email) usando el parámetro `term`.
+* Buscar embajadas por país, dirección o email usando el parámetro `term`.
+* Filtrar embajadas por ciudad, país o tipo.
 
 ## Endpoints
 
 * `GET /embassies`: Obtiene todas las embajadas.
-* `GET /embassies/search?term=TERMINO_DE_BUSQUEDA`: Busca embajadas por país, dirección o email.
-* También puedes filtrar por `city`, `country` o `type`.
+* `GET /embassies/search?term=PAIS_O_DIRECCION_O_EMAIL`: Busca embajadas por país, dirección o email.
+* `GET /embassies/search?city=CIUDAD&country=PAIS&type=TIPO`: Filtra embajadas por ciudad, país o tipo.
+
+## Ejemplo de respuesta
+
+```json
+[
+  {
+    "city": "Bogotá",
+    "embassies": [
+      {
+        "id": "4453986a-3271-4984-b9d4-8b1fe73985db",
+        "country": {
+          "name": "Germany",
+          "alfa2": "DE"
+        },
+        "type": "Embassy",
+        "contacts": [
+          { "type": "address", "value": "Cra 11B #97-80, Bogotá" },
+          { "type": "lat", "value": "4.6763" },
+          { "type": "lng", "value": "-74.0488" },
+          { "type": "phone", "value": "+57 1 1234567" },
+          { "type": "email", "value": "info@germany-embajada.gov" }
+        ]
+      }
+    ]
+  }
+]
+```
 
 ## Configuración
 
