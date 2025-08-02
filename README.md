@@ -1,6 +1,6 @@
 # API de Embajadas
 
-Esta API proporciona acceso a datos de embajadas ubicadas en Bogotá, Colombia. Almacenados en una base de datos PostgreSQL en Supabase. Está desplegada en Vercel y utiliza funciones serverless de Node.js.
+Esta API proporciona acceso a datos de embajadas ubicadas en Bogotá, Colombia. Almacenados en una base de datos PostgreSQL en Supabase. Está desplegada en Vercel y utiliza funciones serverless de Node.js y un sitio web estático.
 (Datos obtenidos de https://www.embassypages.com/ciudad/bogota)
 Hecho con ❤️ por elovejo.com
 
@@ -17,6 +17,10 @@ La API permite:
 * `GET /embassies`: Obtiene todas las embajadas.
 * `GET /embassies/search?term=PAIS_O_DIRECCION_O_EMAIL`: Busca embajadas por país, dirección o email.
 * `GET /embassies/search?city=CIUDAD&country=PAIS&type=TIPO`: Filtra embajadas por ciudad, país o tipo.
+
+## Sitio Web
+
+El sitio web estático se encuentra en la raíz (`/`) y se sirve desde la carpeta `public/index.html`.
 
 ## Ejemplo de respuesta
 
@@ -79,26 +83,40 @@ La API permite:
 
 ### vercel.json
 
-El archivo `vercel.json` configura las rutas de la API:
+El archivo `vercel.json` configura las rutas de la API y el sitio estático:
 
 ```json
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "api/*.js",
-            "use": "@vercel/node"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/embassies",
-            "dest": "/api/embassies.js"
-        },
-        {
-            "src": "/embassies/search",
-            "dest": "/api/search.js"
-        }
-    ]
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/embassies",
+      "dest": "/api/embassies.js"
+    },
+    {
+      "src": "/embassies/search",
+      "dest": "/api/search.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    }
+  ]
 }
 ```
+
+Así, el contenido estático se sirve correctamente y la API sigue funcionando como antes.
